@@ -15,5 +15,6 @@ export default defineConfig(({ mode }) => {
       outDir: 'dist' // Explicitly set output directory
     },
     plugins: [react()],
+    base: '/'
   };
 });

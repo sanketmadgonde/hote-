@@ -21,9 +21,7 @@ app.use(cors());
 app.use(morgan("dev"));
 
 // Static files (for production)
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '..', 'frontend', 'dist')));
-}
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Import routes after middleware but before error handling
 import authRoutes from "./routes/auth.js";
@@ -34,11 +32,9 @@ app.use("/api/auth", authRoutes);
 app.use("/api/menu", menuRoutes);
 
 // Fallback to frontend (for production)
-if (process.env.NODE_ENV === 'production') {
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'frontend', 'dist', 'index.html'));
-  });
-}
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Error handling middleware
 app.use((err, req, res, next) => {
@@ -49,10 +45,7 @@ app.use((err, req, res, next) => {
 // MongoDB connection
 const mongoURI = process.env.MONGO_URI || "mongodb://127.0.0.1:27017/hotel";
 
-mongoose.connect(mongoURI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
+mongoose.connect(mongoURI)
 .then(() => console.log("MongoDB connected"))
 .catch(err => {
   console.error("MongoDB connection error:", err);

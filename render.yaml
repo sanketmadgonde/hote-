@@ -3,7 +3,7 @@ services:
     name: your-app
     runtime: docker
     env: node
-    buildCommand: docker build -t your-app .
+    buildCommand: docker build -t your-app --no-cache .
     startCommand: node server.js
     envVars:
       - key: NODE_ENV
