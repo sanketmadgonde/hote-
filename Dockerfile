@@ -1,27 +1,31 @@
-# Stage 1: Build Frontend
-FROM node:18 AS frontend-builder
-WORKDIR /app/frontend
-COPY ReactFrontend/package*.json ./
-RUN npm install
-COPY ReactFrontend/ .
-RUN npm run build  # Outputs to /app/frontend/dist
+# ----------- BUILD STAGE -----------
+    FROM node:18 AS builder
 
-# Stage 2: Build Backend
-FROM node:18 AS backend-builder
-WORKDIR /app/backend
-COPY Backend/package*.json ./
-RUN npm install --production
-COPY Backend/ .
-
-# Stage 3: Final Image
-FROM node:18-slim
-WORKDIR /app
-
-# Copy backend
-COPY --from=backend-builder /app/backend /app
-
-# Copy frontend build
-COPY --from=frontend-builder /app/frontend/dist /app/public
-
-EXPOSE 5500
-CMD ["node", "server.js"]
+    # Update npm and fix vulnerabilities first
+    RUN npm install -g npm@latest
+    
+    # Frontend build
+    WORKDIR /app/frontend
+    COPY ReactFrontend/package*.json ./
+    RUN npm install && npm audit fix --force
+    COPY ReactFrontend/ .
+    RUN npm run build  # Now outputs to /app/frontend/public (per your Vite config)
+    
+    # Backend setup
+    WORKDIR /app/backend
+    COPY Backend/package*.json ./
+    RUN npm install --production && npm audit fix --force
+    COPY Backend/ .
+    
+    # ----------- PRODUCTION STAGE -----------
+    FROM node:18-slim
+    WORKDIR /app
+    
+    # Copy backend
+    COPY --from=builder /app/backend /app
+    
+    # Copy frontend build (note changed path from dist to public)
+    COPY --from=builder /app/frontend/public /app/public
+    
+    EXPOSE 5500
+    CMD ["node", "server.js"]
