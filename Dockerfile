@@ -1,17 +1,17 @@
 # ----------- BUILD STAGE -----------
     FROM node:18 AS builder
 
-    # Update npm and fix vulnerabilities first
-    RUN npm install -g npm@latest
+    # 1. Update npm to latest compatible version
+    RUN npm install -g npm@10.8.2
     
-    # Frontend build
+    # 2. Frontend build
     WORKDIR /app/frontend
     COPY ReactFrontend/package*.json ./
     RUN npm install && npm audit fix --force
     COPY ReactFrontend/ .
-    RUN npm run build  # Now outputs to /app/frontend/public (per your Vite config)
+    RUN npm run build
     
-    # Backend setup
+    # 3. Backend setup
     WORKDIR /app/backend
     COPY Backend/package*.json ./
     RUN npm install --production && npm audit fix --force
@@ -24,8 +24,8 @@
     # Copy backend
     COPY --from=builder /app/backend /app
     
-    # Copy frontend build (note changed path from dist to public)
-    COPY --from=builder /app/frontend/public /app/public
+    # Copy frontend build (use correct path from your build output)
+    COPY --from=builder /app/frontend/dist /app/public
     
     EXPOSE 5500
     CMD ["node", "server.js"]

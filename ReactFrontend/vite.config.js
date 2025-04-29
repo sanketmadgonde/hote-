@@ -12,8 +12,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     build: {
-      outDir: '../Backend/public',  // Ensure this matches Dockerfile
-      emptyOutDir: true,
+      outDir: 'dist' // Explicitly set output directory
     },
     plugins: [react()],
   };
