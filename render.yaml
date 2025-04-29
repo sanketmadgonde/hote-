@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: your-app
+    runtime: docker
+    env: node
+    buildCommand: docker build -t your-app .
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5500
+      - key: MONGO_URI
+        value: mongodb+srv://sanketmadgonde1718:kxqPuVAJn03HCQg9@cluster0.eqqnqro.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+    healthCheckPath: /api/health
+    port: 5500
