@@ -1,20 +1,17 @@
 # ----------- BUILD STAGE -----------
     FROM node:18 AS builder
 
-    # 1. Update npm to latest compatible version
-    RUN npm install -g npm@10.8.2
-    
-    # 2. Frontend build
+    # Frontend build
     WORKDIR /app/frontend
     COPY ReactFrontend/package*.json ./
-    RUN npm install && npm audit fix --force
+    RUN npm install
     COPY ReactFrontend/ .
-    RUN npm run build
+    RUN npm run build  # Outputs to /app/frontend/dist
     
-    # 3. Backend setup
+    # Backend setup
     WORKDIR /app/backend
     COPY Backend/package*.json ./
-    RUN npm install --production && npm audit fix --force
+    RUN npm install --production
     COPY Backend/ .
     
     # ----------- PRODUCTION STAGE -----------
@@ -24,8 +21,12 @@
     # Copy backend
     COPY --from=builder /app/backend /app
     
-    # Copy frontend build (use correct path from your build output)
+    # Copy frontend build (matches Vite's outDir)
     COPY --from=builder /app/frontend/dist /app/public
+    
+    # Environment variables
+    ENV NODE_ENV=production
+    ENV PORT=5500
     
     EXPOSE 5500
     CMD ["node", "server.js"]
